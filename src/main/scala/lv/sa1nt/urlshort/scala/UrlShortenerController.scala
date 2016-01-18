@@ -1,8 +1,6 @@
 package lv.sa1nt.urlshort.scala
 
 import akka.actor.ActorSystem
-import com.typesafe.config.ConfigFactory
-import com.typesafe.config.Config
 import org.apache.commons.validator.routines.UrlValidator
 import spray.http.StatusCodes
 import spray.routing.SimpleRoutingApp
@@ -21,9 +19,9 @@ object UrlShortenerController extends App with SimpleRoutingApp {
 //  println(config);
 //  println(config.getConfig("scredis"));
 
-  implicit val redis = scredis.Redis(ConfigFactory.load("redis.conf"))
+  implicit val redis = scredis.Redis()
 
-  startServer("0.0.0.0", 8080) {
+  startServer("127.0.0.1", 8080) {
     path(Rest) { r =>
       get {
         redirectShortUrl(r)
@@ -43,6 +41,7 @@ object UrlShortenerController extends App with SimpleRoutingApp {
 
   def createShortUrl(path: String)(implicit redis: scredis.Redis) = (ctx: RequestContext) => {
     Task {
+      println(path)
       val validator = UrlValidator.getInstance
       if (validator.isValid(path)) {
         val rand = Random.alphanumeric.take(7).mkString
